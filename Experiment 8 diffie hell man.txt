@@ -1,0 +1,48 @@
+Experiment 8 diffie hell man
+
+#include <stdio.h>
+
+long long power(long long a, long long b, long long p)
+{
+    long long result = 1;
+
+    while (b > 0)
+    {
+        result = (result * a) % p;
+        b--;
+    }
+
+    return result;
+}
+
+int main()
+{
+    long long p = 23;  // Prime number
+    long long g = 5;   // Primitive root
+
+    long long a = 6;   // Alice's private key
+    long long b = 15;  // Bob's private key
+
+    long long A, B;
+    long long key1, key2;
+
+    // Calculate public keys
+    A = power(g, a, p);
+    B = power(g, b, p);
+
+    // Calculate shared secret keys
+    key1 = power(B, a, p);
+    key2 = power(A, b, p);
+
+    printf("Public Key of Alice: %lld\n", A);
+    printf("Public Key of Bob: %lld\n", B);
+    printf("Shared Key of Alice: %lld\n", key1);
+    printf("Shared Key of Bob: %lld\n", key2);
+
+    return 0;
+}
+
+
+gcc diffie_hellman.c -o diffie_hellman
+
+./diffie_hellman

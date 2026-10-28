@@ -1,0 +1,78 @@
+Experiment 11 digital signature
+
+
+#include <stdio.h>
+#include <string.h>
+#include <openssl/dsa.h>
+#include <openssl/sha.h>
+
+int main()
+{
+    DSA *dsa;
+    unsigned char message[] = "Hello world";
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    DSA_SIG *signature;
+
+    // Generate SHA-256 hash of the message
+    SHA256(message, strlen((char *)message), hash);
+
+    // Create DSA object
+    dsa = DSA_new();
+
+    if (dsa == NULL)
+    {
+        printf("DSA creation failed\n");
+        return 1;
+    }
+
+    // Generate DSA parameters
+    if (DSA_generate_parameters_ex(dsa, 1024, NULL, 0,
+                                   NULL, NULL, NULL) != 1)
+    {
+        printf("Parameter generation failed\n");
+        DSA_free(dsa);
+        return 1;
+    }
+
+    // Generate DSA key pair
+    if (DSA_generate_key(dsa) != 1)
+    {
+        printf("Key generation failed\n");
+        DSA_free(dsa);
+        return 1;
+    }
+
+    // Generate digital signature
+    signature = DSA_do_sign(hash, SHA256_DIGEST_LENGTH, dsa);
+
+    if (signature != NULL)
+    {
+        printf("Digital Signature Generated Successfully\n");
+    }
+    else
+    {
+        printf("Digital Signature Generation Failed\n");
+        DSA_free(dsa);
+        return 1;
+    }
+
+    // Verify digital signature
+    if (DSA_do_verify(hash, SHA256_DIGEST_LENGTH,
+                      signature, dsa) == 1)
+    {
+        printf("Signature Verified Successfully\n");
+    }
+    else
+    {
+        printf("Signature Verification Failed\n");
+    }
+
+    // Free allocated memory
+    DSA_SIG_free(signature);
+    DSA_free(dsa);
+
+    return 0;
+}
+
+gcc dsa_signature.c -o dsa_signature -lcrypto
+./dsa_signature
